@@ -1,0 +1,6 @@
+.venv
+
+.eggs
+src/ansible_argspec_gen.egg-info/
+
+Pipfile.lock
