@@ -161,8 +161,9 @@ def process_module(path, marker, show_diff, dry_run, line_length):
             old_lines, new_lines, fromfile=path + ".old", tofile=path + ".new",
         ))
 
-    if not dry_run:
+    changed = old_lines != new_lines
+    if not dry_run and changed:
         with open(path, "w") as fd:
             fd.writelines(new_lines)
 
-    return old_lines != new_lines
+    return changed

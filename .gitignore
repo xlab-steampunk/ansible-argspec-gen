@@ -4,3 +4,6 @@
 src/ansible_argspec_gen.egg-info/
 
 Pipfile.lock
+
+build
+dist
