@@ -25,11 +25,12 @@ def get_module_docs(module):
     return plugin_docs.get_docstring(module, fragment_loader)[0]
 
 
-def to_code(data, line_length):
+def to_code(var_name, var_data, line_length):
+    source = "{} = {}".format(var_name, repr(var_data))
     mode = black.Mode(
         target_versions={black.TargetVersion.PY27}, line_length=line_length,
     )
-    return black.format_str(repr(data), mode=mode)
+    return black.format_str(source, mode=mode)
 
 
 def update_module(old_lines, marker, params, line_length):
@@ -44,7 +45,7 @@ def update_module(old_lines, marker, params, line_length):
 
     # Insert module parameters
     for k, v in params.items():
-        code = "{} = {}".format(k, to_code(v, line_length - indent))
+        code = to_code(k, v, line_length - indent)
         new_lines.extend(
             textwrap.indent(code, " " * indent).splitlines(keepends=True),
         )
@@ -71,6 +72,11 @@ def option_to_spec(option):
     }
     if "suboptions" in option:
         argspec_opt["options"] = options_to_spec(option["suboptions"])
+        if any(
+                "default" in o or "fallback" in o
+                for o in argspec_opt["options"].values()
+        ):
+            argspec_opt["apply_defaults"] = True
     return argspec_opt
 
 
