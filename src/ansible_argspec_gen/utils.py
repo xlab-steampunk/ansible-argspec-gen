@@ -28,7 +28,7 @@ def get_module_docs(module):
 def to_code(var_name, var_data, line_length):
     source = "{} = {}".format(var_name, repr(var_data))
     mode = black.Mode(
-        target_versions={black.TargetVersion.PY27}, line_length=line_length,
+        target_versions={black.TargetVersion.PY37}, line_length=line_length,
     )
     return black.format_str(source, mode=mode)
 
@@ -65,7 +65,7 @@ def update_module(old_lines, marker, params, line_length):
 
 def option_to_spec(option):
     DESC_KEYS = (
-        "aliases", "choices", "default", "elements", "required", "type",
+        "aliases", "choices", "default", "elements", "required", "type", "no_log"
     )
     argspec_opt = {
         name: option[name] for name in DESC_KEYS if name in option
