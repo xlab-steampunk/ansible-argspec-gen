@@ -92,18 +92,38 @@ def options_to_required_if(options):
     #   requirements[("state", "present")] == ["opt1", "opt2"]
     requirements = collections.defaultdict(list)
 
-    # Match things like "required if I(state) is C(present)"
-    pattern = re.compile(r"[Rr]equired if I\(([^\)]+)\) is C\(([^\)]+)\)")
+    # Match things like "required if I(state) is C(present)" or 
+    # "required if I(state) is not set"
+    r_strings = [
+        r"[Rr]equired if I\(([^\)]+)\) is C\(([^\)]+)\)",   # match_index 0
+        r"[Rr]equired if I\(([^\)]+)\) is not set"          # match_index 1
+    ]
 
+    patterns = [re.compile(r_string) for r_string in r_strings]
+    
     for name, data in options.items():
         for desc in data["description"]:
-            match = pattern.search(desc)
-            if not match:
+            match = None
+            match_index = 0
+
+            while match_index < len(patterns) and match is None:
+                match = patterns[match_index].match(desc)
+                match_index += 1
+            match_index -= 1 
+            if match is None:
+                # No match
                 continue
 
             # Convert extracted value to the right type.
             typ = options[match[1]].get("type", "str")
-            val = getattr(validation, "check_type_" + typ)(match[2])
+            if match_index == 0:
+                # ex : Required if I(state) is C(present)
+                val = getattr(validation, "check_type_" + typ)(match[2])
+            elif match_index == 1:
+                # ex : Required if I(state) is not set
+                val = None
+            else:
+                raise ParseError("Unknown required_if pattern")
             requirements[(match[1], val)].append(name)
 
     # Convert

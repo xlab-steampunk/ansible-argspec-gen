@@ -66,7 +66,7 @@ on, we will get back something like this::
 
         module = AnsibleModule(
 
-Once we are happy wth the proposed changes, we can write them to the file::
+Once we are happy with the proposed changes, we can write them to the file::
 
    $ ansible-argspec-gen plugins/modules/route.py
 
@@ -96,6 +96,17 @@ I({param_name}) is C({param_value})*. The next example::
 will produce the following specification::
 
    required_if = [("state", "present", ("name", ))]
+
+It is also possible to require if the parameter is not set.
+For instance 
+   
+      options:
+      name:
+         description:
+            - Name of the resource. Required if I(state) is not set.
+will produce the following specification::
+
+   required_if = [("state", None, ("name", ))]
 
 Another thing that generator knows how to produce is the ``mutually_exclusive``
 specification. The pattern that the generator is looking for in this case is
